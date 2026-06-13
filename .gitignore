@@ -19,6 +19,7 @@ dist/
 build/
 *.egg-info/
 .eggs/
+backend/.env.example
 
 # IDE
 .vscode/
