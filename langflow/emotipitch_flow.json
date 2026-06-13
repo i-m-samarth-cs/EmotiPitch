@@ -1,0 +1,130 @@
+{
+  "id": "emotipitch-explanation-flow",
+  "name": "EmotiPitch Explanation Flow",
+  "description": "Orchestrates emotion detection, match context, and Granite LLM for tactical explanations",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "input-1",
+      "type": "InputNode",
+      "data": {
+        "name": "User Input",
+        "fields": [
+          {
+            "name": "emotion",
+            "type": "string",
+            "description": "User's current emotion (angry, excited, confused, neutral)"
+          },
+          {
+            "name": "match_event",
+            "type": "string",
+            "description": "Description of the match event"
+          },
+          {
+            "name": "timestamp",
+            "type": "number",
+            "description": "Video timestamp in seconds"
+          }
+        ]
+      },
+      "position": { "x": 100, "y": 200 }
+    },
+    {
+      "id": "prompt-builder-1",
+      "type": "PromptTemplate",
+      "data": {
+        "name": "Explanation Prompt Builder",
+        "template": "You are EmotiPitch, an empathetic football tactical explainer.\n\nUser's emotion: {emotion}\nMatch event: {match_event}\nTimestamp: {timestamp} seconds\n\nGenerate an explanation in this style:\n- If Angry: \"I saw you were upset. Here's why the referee didn't intervene...\"\n- If Confused: \"Let me break this down simply. Brazil switched to 4-2-4 because...\"\n- If Excited: \"That goal was amazing! The tactic behind it was...\"\n\nInclude:\n1. Empathetic opening (1 sentence matching emotion)\n2. Tactical explanation (2-3 sentences with formation/player names)\n3. Momentum impact (1 sentence on why this changed the game)\n4. Visual metaphor (1 sentence like \"It's like replacing your goalkeeper with a striker\")\n\nKeep total under 80 words. Be warm, not robotic.",
+        "variables": ["emotion", "match_event", "timestamp"]
+      },
+      "position": { "x": 400, "y": 200 }
+    },
+    {
+      "id": "llm-1",
+      "type": "LLMNode",
+      "data": {
+        "name": "IBM Granite LLM",
+        "model": "ibm/granite-3-8b-instruct",
+        "provider": "watsonx.ai",
+        "parameters": {
+          "max_tokens": 200,
+          "temperature": 0.7,
+          "top_p": 0.9,
+          "top_k": 50
+        }
+      },
+      "position": { "x": 700, "y": 200 }
+    },
+    {
+      "id": "output-formatter-1",
+      "type": "OutputFormatter",
+      "data": {
+        "name": "Response Formatter",
+        "format": {
+          "explanation": "{llm_output}",
+          "tactical_impact": "Extracted from LLM response",
+          "confidence": 85
+        }
+      },
+      "position": { "x": 1000, "y": 200 }
+    },
+    {
+      "id": "output-1",
+      "type": "OutputNode",
+      "data": {
+        "name": "Final Output",
+        "fields": [
+          {
+            "name": "explanation",
+            "type": "string"
+          },
+          {
+            "name": "tactical_impact",
+            "type": "string"
+          },
+          {
+            "name": "confidence",
+            "type": "number"
+          }
+        ]
+      },
+      "position": { "x": 1300, "y": 200 }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-1",
+      "source": "input-1",
+      "target": "prompt-builder-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "edge-2",
+      "source": "prompt-builder-1",
+      "target": "llm-1",
+      "sourceHandle": "output",
+      "targetHandle": "prompt"
+    },
+    {
+      "id": "edge-3",
+      "source": "llm-1",
+      "target": "output-formatter-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    },
+    {
+      "id": "edge-4",
+      "source": "output-formatter-1",
+      "target": "output-1",
+      "sourceHandle": "output",
+      "targetHandle": "input"
+    }
+  ],
+  "metadata": {
+    "created_at": "2026-06-13",
+    "author": "EmotiPitch Team",
+    "challenge": "June Innovation Challenge",
+    "theme": "Soccer + AI + World Cup"
+  }
+}
